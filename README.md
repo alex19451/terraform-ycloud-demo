@@ -69,7 +69,7 @@ provider_installation {
 Clone repository:
 
 ```
-https://github.com/sk0ld/terraform-ycloud-demo.git
+git clone https://github.com/sk0ld/terraform-ycloud-demo.git
 cd terraform-ycloud-demo
 ```
 

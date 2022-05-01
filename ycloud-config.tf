@@ -6,6 +6,26 @@ terraform {
   }
 }
 
+variable "cloud_id" {
+  type = string
+  description = "Yandex Cloud ID"
+}
+
+variable "folder_id" {
+  type = string
+  description = "Yandex Cloud folder id"
+}
+
+variable "sa_id" {
+  type = string
+  description = "Yandex Cloud service account id"
+}
+
+variable "token" {
+  type = string
+  description = "Yandex Cloud token"
+}
+
 locals {
   image_id = "fd8sc0f4358r8pt128gg"
   zone = "ru-central1-b"

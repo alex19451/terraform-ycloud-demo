@@ -1,4 +1,4 @@
-  variable "cloud_id" {
+variable "cloud_id" {
   type = string
   description = "Yandex Cloud ID"
 }

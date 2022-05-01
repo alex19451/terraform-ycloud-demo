@@ -6,10 +6,6 @@ terraform {
   }
 }
 
-variable "token" {
-  type = string
-}
-
 locals {
   image_id = "fd8sc0f4358r8pt128gg"
   zone = "ru-central1-b"

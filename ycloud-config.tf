@@ -72,6 +72,7 @@ resource "yandex_compute_instance" "vm-dev" {
   boot_disk {
     initialize_params {
       image_id = local.image_id
+      type     = "network-ssd"
       size = 15
     }
   }
@@ -124,6 +125,7 @@ resource "yandex_compute_instance" "vm-prod" {
   boot_disk {
     initialize_params {
       image_id = local.image_id
+      type     = "network-ssd"
       size = 15
     }
   }

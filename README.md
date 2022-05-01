@@ -6,7 +6,7 @@ Short info
 
 Tested on Ubuntu 20.04
 
-Terraform scenarion creates instances (Ubuntu 20.04 LTS) on YC:
+Terraform scenario creates instances (Ubuntu 20.04 LTS) on YC:
 
 1) vm-dev with maven to package war file (boxfuse app)
 2) S3 bucket to copy war file

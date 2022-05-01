@@ -6,7 +6,8 @@ Short info
 
 Tested on Ubuntu 20.04
 
-Terraform scenarion creates instances on YC:
+Terraform scenarion creates instances (Ubuntu 20.04 LTS) on YC:
+
 1) vm-dev with maven to package war file (boxfuse app)
 2) S3 bucket to copy war file
 3) vm-prod to download war file from bucket and publish with tomcat
@@ -20,8 +21,10 @@ Preparation:
 Additional packages are required (including terraform):
 
 ```
-apt update && apt install -y s3cmd
+apt update && apt install -y s3cmd git
 ```
+Terraform installation:
+https://learn.hashicorp.com/tutorials/terraform/install-cli?in=terraform/aws-get-started
 
 YC CLI install:
 ```
@@ -61,6 +64,13 @@ provider_installation {
     exclude = ["registry.terraform.io/*/*"]
   }
 }
+```
+
+Clone repository:
+
+```
+https://github.com/sk0ld/terraform-ycloud-demo.git
+cd terraform-ycloud-demo
 ```
 
 To prepare configuration (inside the directory with *.tf):

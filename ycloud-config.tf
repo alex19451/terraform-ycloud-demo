@@ -62,7 +62,7 @@ resource "yandex_compute_instance" "vm-dev" {
   }
 
   metadata = {
-    user-data = "${file("/home/${local.user_name}/.meta.txt")}"
+    user-data = "${file("/home/${local.user_name}/meta.txt")}"
   }
 
   provisioner "file" {

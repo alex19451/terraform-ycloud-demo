@@ -18,6 +18,8 @@ Follow http://vm-prod-public-ip:8080/hello-1.0
 Preparation:
 ------------
 
+
+
 Additional packages are required (including terraform):
 
 ```
@@ -36,6 +38,13 @@ YC init to initialize your profile with token:
 yc init
 ```
 Follow YC manual: https://cloud.yandex.ru/docs/cli/quickstart
+
+Clone repository:
+
+```
+git clone https://github.com/sk0ld/terraform-ycloud-demo.git
+cd terraform-ycloud-demo
+```
 
 To create file with your IDs (inside project directory):
 ```
@@ -64,13 +73,6 @@ provider_installation {
     exclude = ["registry.terraform.io/*/*"]
   }
 }
-```
-
-Clone repository:
-
-```
-git clone https://github.com/sk0ld/terraform-ycloud-demo.git
-cd terraform-ycloud-demo
 ```
 
 To prepare configuration (inside the directory with *.tf):

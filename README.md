@@ -93,6 +93,11 @@ To delete all the created instances:
 terraform destroy
 ```
 
+To delete all without confirmation:
+```
+terraform destroy --auto-approve
+```
+
 Requirements
 ------------
 
@@ -103,7 +108,7 @@ Delete all networks inside directory or contact YC support to extend quantity of
 Info for S3 Bucket
 ------------------
 
-Static key for sevice account:
+Static key for service account:
 https://github.com/yandex-cloud/docs/blob/master/en/iam/operations/sa/create-access-key.md
 
 Configure service account to use S3 storage:

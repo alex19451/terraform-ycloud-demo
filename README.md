@@ -141,6 +141,6 @@ users:
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
       ssh-authorized-keys:
-      - ssh-rsa AAAAB3Nza......OjbSMRX pcadm@vm-ubuntu210p
+      - ssh-rsa AAAAB3Nza......OjbSMRX pcadm@vm-ubuntu210
 ```
 

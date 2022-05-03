@@ -140,8 +140,7 @@ users:
     groups: sudo
     shell: /bin/bash
     sudo: ['ALL=(ALL) NOPASSWD:ALL']
-    ssh-authorized-keys:
-      - ssh-rsa AAAAB3Nza......OjbSMRX user@example.com
-      - ssh-rsa AAAAB3Nza......Pu00jRN user@desktop
+      ssh-authorized-keys:
+      - ssh-rsa AAAAB3Nza......OjbSMRX pcadm@vm-ubuntu210p
 ```
 

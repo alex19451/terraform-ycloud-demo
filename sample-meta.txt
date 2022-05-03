@@ -1,0 +1,11 @@
+#Example of meta.txt
+#Put it to /home/your_user/meta.txt
+
+#cloud-config
+users:
+  - name: pcadm
+    groups: sudo
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh-authorized-keys:
+      - ssh-rsa AAAAB3Nza......OjbSMRX pcadm@vm-ubuntu210

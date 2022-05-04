@@ -6,173 +6,134 @@ terraform {
   }
 }
 
-variable "cloud_id" {
-  type = string
-  description = "Yandex Cloud ID"
-}
-
-variable "folder_id" {
-  type = string
-  description = "Yandex Cloud folder id"
-}
-
-variable "sa_id" {
-  type = string
-  description = "Yandex Cloud service account id"
-}
-
-variable "token" {
-  type = string
-  description = "Yandex Cloud token"
-}
-
-locals {
-  image_id = "fd8sc0f4358r8pt128gg"
-  zone = "ru-central1-b"
-  user_name = "pcadm"
-  bucket_name = "tf-bucket-yc"
-}
 provider "yandex" {
-  token     = var.token
-  cloud_id  = var.cloud_id
-  folder_id = var.folder_id
-  zone      = local.zone
+  token     = "token"
+  cloud_id  = "b1gsgarlchl6avjsn2vj"
+  folder_id = "b1gvq38letn60dbl2ed1"
+  zone      = "ru-central1-a"
 }
 
-resource "yandex_iam_service_account_static_access_key" "sa-static-key" {
-  service_account_id = var.sa_id
-  description        = "static access key for object storage"
+variable "user" {
+   description = "registry user docker hub"
+   type        = string
+   default     = "12431551"
+}
+variable "password" {
+   description = "registry password docker hub"
+   type        = string
+   default     = "password"
+}
+variable "vers" {
+   description = "registry password docker hub"
+   type        = string
+   default     = "2.0"
 }
 
-resource "yandex_storage_bucket" "tf-bucket-yc" {
-  access_key = yandex_iam_service_account_static_access_key.sa-static-key.access_key
-  secret_key = yandex_iam_service_account_static_access_key.sa-static-key.secret_key
-  bucket = local.bucket_name
+resource "yandex_compute_instance" "build-node" {
+  name = "build-node"
+
+  resources {
+    cores  = 2
+    memory = 2
+  }
+
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8sc0f4358r8pt128gg"
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet-1.id
+    nat       = true
+  }
+
+  metadata = {
+    user-data = "${file("/home/alex1945/terraform1/meta.txt")}"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update && sudo apt install -y docker.io git",
+      "git clone https://github.com/alex19451/devoptest.git ./app",
+      "cd app/docker-compose/mvnbuild && sudo docker build -t myimagenew:${var.vers} .",
+      "sudo docker login -u ${var.user} -p ${var.password}",
+      "sudo docker tag myimagenew:${var.vers} ${var.user}/myimagenew:${var.vers} && sudo docker push ${var.user}/myimagenew:${var.vers}"
+          ]
+    connection {
+      type     = "ssh"
+      user     =  "alex1945"
+      private_key = "${file("/root/.ssh/yandex_c")}"
+      host     = self.network_interface.0.nat_ip_address
+    }
+  }
+}
+resource "yandex_compute_instance" "prod-node" {
+  name = "prod-node"
+
+  resources {
+    cores  = 4
+    memory = 4
+  }
+
+  boot_disk {
+    initialize_params {
+      image_id = "fd8sc0f4358r8pt128gg"
+      type = "network-ssd"
+      size = 15
+    }
+  }
+
+  network_interface {
+    subnet_id = yandex_vpc_subnet.subnet-1.id
+    nat       = true
+  }
+
+  metadata = {
+    user-data = "${file("/home/alex1945/terraform1/meta.txt")}"
+  }
+  provisioner "remote-exec" {
+    inline = [
+      "sudo apt update && sudo apt install -y docker.io",
+      "sudo docker run -p 8088:8080 ${var.user}/myimagenew:${var.vers}",
+          ]
+    connection {
+      type     = "ssh"
+      user     =  "alex1945"
+      private_key = "${file("/root/.ssh/yandex_c")}"
+      host     = self.network_interface.0.nat_ip_address
+    }
+   }
+  depends_on = [
+    yandex_compute_instance.build-node,
+  ]
 }
 
 resource "yandex_vpc_network" "network-1" {
   name = "network1"
 }
+
+
 resource "yandex_vpc_subnet" "subnet-1" {
   name           = "subnet1"
-  zone           = "ru-central1-b"
+  zone           = "ru-central1-a"
   network_id     = yandex_vpc_network.network-1.id
-  v4_cidr_blocks = ["10.129.0.0/24"]
+  v4_cidr_blocks = ["192.168.10.0/24"]
 }
 
-resource "yandex_compute_instance" "vm-dev" {
-  name        = "vm-dev"
-  
-  resources {
-    cores  = 2
-    memory = 2
-    core_fraction = 20
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = local.image_id
-      type     = "network-ssd"
-      size = 15
-    }
-  }
-
-  network_interface {
-    subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat = true
-  }
-
-  metadata = {
-    user-data = "${file("/home/${local.user_name}/meta.txt")}"
-  }
-
-  provisioner "file" {
-    source      = "/home/${local.user_name}/.s3cfg"
-    destination = "/home/${local.user_name}/.s3cfg"
-    connection {
-      type     = "ssh"
-      user     = local.user_name
-      private_key = "${file("/home/${local.user_name}/.private_yc")}"
-      host     = self.network_interface.0.nat_ip_address
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt update && sudo apt install -y git maven s3cmd",
-      "git clone https://github.com/boxfuse/boxfuse-sample-java-war-hello.git ./app-src",
-      "cd app-src/ && mvn package -DskipTest",
-      "s3cmd --storage-class COLD put ./target/hello-1.0.war s3://${local.bucket_name}/hello-1.0.war"
-          ]
-    connection {
-      type     = "ssh"
-      user     = local.user_name
-      private_key = "${file("/home/${local.user_name}/.private_yc")}"
-      host     = self.network_interface.0.nat_ip_address
-    }
-  }
+output "internal_ip_address_vm_1" {
+  value = yandex_compute_instance.build-node.network_interface.0.ip_address
 }
 
-resource "yandex_compute_instance" "vm-prod" {
-  name        = "vm-prod"
-
-  resources {
-    cores  = 2
-    memory = 2
-    core_fraction = 20
-  }
-
-  boot_disk {
-    initialize_params {
-      image_id = local.image_id
-      type     = "network-ssd"
-      size = 15
-    }
-  }
-
-  network_interface {
-    subnet_id = "${yandex_vpc_subnet.subnet-1.id}"
-    nat = true
-  }
-
-  metadata = {
-    user-data = "${file("/home/${local.user_name}/meta.txt")}"
-  }
-
-  provisioner "file" {
-    source      = "/home/${local.user_name}/.s3cfg"
-    destination = "/home/${local.user_name}/.s3cfg"
-    connection {
-      type     = "ssh"
-      user     = local.user_name
-      private_key = "${file("/home/${local.user_name}/.private_yc")}"
-      host     = self.network_interface.0.nat_ip_address
-    }
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "sudo apt update && sudo apt install -y s3cmd tomcat9",
-      "s3cmd get s3://${local.bucket_name}/hello-1.0.war hello-1.0.war",
-      "sudo cp hello-1.0.war /var/lib/tomcat9/webapps/",
-      "s3cmd rm s3://${local.bucket_name} --force --recursive"
-    ]
-    connection {
-      type     = "ssh"
-      user     = local.user_name
-      private_key = "${file("/home/${local.user_name}/.private_yc")}"
-      host     = self.network_interface.0.nat_ip_address
-    }
-  }
-  depends_on = [
-    yandex_compute_instance.vm-dev,
-  ]
+output "internal_ip_address_vm_2" {
+  value = yandex_compute_instance.prod-node.network_interface.0.ip_address
 }
 
-output "public_ip_address_vm-dev" {
-  value = yandex_compute_instance.vm-dev.network_interface.0.nat_ip_address
+
+output "external_ip_address_vm_1" {
+  value = yandex_compute_instance.build-node.network_interface.0.nat_ip_address
 }
 
-output "public_ip_address_vm-prod" {
-  value = yandex_compute_instance.vm-prod.network_interface.0.nat_ip_address
+output "external_ip_address_vm_2" {
+  value = yandex_compute_instance.prod-node.network_interface.0.nat_ip_address
 }

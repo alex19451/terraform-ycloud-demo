@@ -119,7 +119,7 @@ Copy S3 config to your user directory:
 cp ~/.s3cfg /home/your_user/.s3cfg
 ```
 
-ssh keys and additial configs:
+ssh keys and additional configs:
 -----------------------------
 
 Generate and put private and public ssh keys for your VMs here:
